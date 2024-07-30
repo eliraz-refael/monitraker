@@ -1,34 +1,18 @@
-import { useState, useEffect } from 'react'
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
+import { createRouter, RouterProvider } from '@tanstack/react-router'
 import './App.css'
-import { createClient, Session } from '@supabase/supabase-js'
+import { routeTree } from './routeTree.gen'
 
-const supabase = createClient('https://cvrpfbzmlftggnouuhjg.supabase.co', 'aaa')
+const router = createRouter({ routeTree })
+
+// Register the router instance for type safety
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
 
 function App() {
-    const [session, setSession] = useState<Session | null>(null)
-
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session)
-        })
-
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session)
-        })
-
-        return () => subscription.unsubscribe()
-    }, [])
-
-    if (!session) {
-        return (<Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />)
-    }
-    else {
-        return (<div>Logged in!</div>)
-    }
+  <RouterProvider router={router} />
 }
 
 export default App
